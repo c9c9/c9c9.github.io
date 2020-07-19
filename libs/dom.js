@@ -9,6 +9,9 @@
     indexOfCall = function (arr, value) {
       return arrayIndexOf.call(arr, value)
     },
+    trunc = Math.trunc || (Math.trunc = function (v) {
+      return !isFinite(v = +v) ? v : (v - v % 1) || (v < 0 ? -0 : v === 0 ? v : 0);
+    }),
     Obj = Object,
     defineProperty = Obj.defineProperty,
     hasOwnProperty = Obj.prototype.hasOwnProperty,
@@ -65,6 +68,8 @@
   $.all = function (selector, context) {
     return domFromNodeList((context || doc).querySelectorAll(selector))
   };
+  $.isArray = isArray;
+  $.trunc = trunc;
   var $console = $.console = console, noop = $.noop = function () {
     }, domFromNode = $.byNode = $.by = function (node) {
       var dom = createDomM();
@@ -114,8 +119,10 @@
       return typeof obj === "number"
     }, isNumber = $.isNumber = function (obj) {
       return isNumberT(obj) && isFinite(obj)
+    }, toInt = $.toInt = function (obj) {
+      return isFinite(obj = trunc(obj)) ? obj : 0
     }, isInt = $.isInt = function (obj) {
-      return obj | 0 === obj
+      return toInt(obj) === obj
     }, toNumeral = $.toNumeral = function (obj) {
       return (isNumber(obj) ? obj : isString(obj) ? parseFloat(obj) : +obj) || 0;
     }, isBoolean = $.isBoolean = function (obj) {
@@ -2858,7 +2865,7 @@
     progress = isFunction(progress) ? progress : UNDEFINED;
     loadend = isFunction(loadend) ? loadend : UNDEFINED;
 
-    var ret, sid, timeout = options.timeout, RET = ret = {
+    var ret, sid, timeout = options.timeout | 0, RET = ret = {
       abort: function () {
         if (on) {
           on({type: 'abort', isLocaleAbort: TRUE})
@@ -2936,7 +2943,7 @@
       if (request.onprogress !== UNDEFINED) {
         request.onprogress = progress
       } else {
-        progressTimeout = Math.min(Math.max((timeout | 0) / 100, 100), 100);
+        progressTimeout = Math.min(Math.max(timeout / 100, 100), 100);
         localeProgress = function () {
           if (localeProgress && progress && request && ++progressCount < 99) {
             localeProgressId = setTimeout(localeProgress, progressTimeout);
